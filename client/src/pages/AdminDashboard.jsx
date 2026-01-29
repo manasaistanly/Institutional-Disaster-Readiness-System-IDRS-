@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { FaBullhorn, FaCheckCircle, FaExclamationCircle, FaTrash } from 'react-icons/fa';
+import { FaBullhorn, FaCheckCircle, FaExclamationCircle, FaTrash, FaShieldAlt, FaUsers, FaHistory, FaSignal } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
@@ -38,6 +38,7 @@ const AdminDashboard = () => {
             setStatus({ type: 'success', msg: 'Alert Broadcasted Successfully!' });
             setFormData({ ...formData, title: '', description: '' }); // Reset form
             fetchAlerts(); // Refresh list
+            setTimeout(() => setStatus({ type: '', msg: '' }), 3000);
         } catch (err) {
             setStatus({ type: 'error', msg: err.response?.data?.message || 'Failed to broadcast alert' });
         }
@@ -53,146 +54,175 @@ const AdminDashboard = () => {
         }
     };
 
+    // calculate stats
+    const activeCount = alerts.filter(a => a.active).length;
+    const totalCount = alerts.length;
+    const emergencyCount = alerts.filter(a => a.active && a.severity === 'emergency').length;
+
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 container mx-auto text-white">
-            <h1 className="text-5xl font-extrabold mb-10 flex items-center gap-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                <FaBullhorn className="text-white" /> Admin Control Center
-            </h1>
+        <div className="min-h-screen pt-4 pb-8 px-4 container mx-auto text-white">
 
-            <div className="grid lg:grid-cols-2 gap-10">
-                {/* Create Alert Section - Glass Effect */}
-                <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-600"></div>
-
-                    <h2 className="text-3xl font-bold mb-6 text-blue-200">Broadcast Alert</h2>
-
-                    {status.msg && (
-                        <div className={`p-4 mb-6 rounded-xl flex items-center gap-3 ${status.type === 'success' ? 'bg-green-500/20 text-green-200 border border-green-500/30' : 'bg-red-500/20 text-red-200 border border-red-500/30'}`}>
-                            {status.type === 'success' ? <FaCheckCircle /> : <FaExclamationCircle />}
-                            {status.msg}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block mb-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">Alert Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                className="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:border-blue-500 focus:bg-black/50 transition-all outline-none text-lg placeholder-gray-500"
-                                placeholder="e.g., FIRE ALARM SENSOR 3 TRIGGERED"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block mb-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">Severity Level</label>
-                            <div className="relative">
-                                <select
-                                    name="severity"
-                                    value={formData.severity}
-                                    onChange={handleChange}
-                                    className="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:border-blue-500 focus:bg-black/50 transition-all outline-none appearance-none"
-                                >
-                                    <option value="info">🔵 Info / General Announcement</option>
-                                    <option value="warning">🟠 Warning / Caution Required</option>
-                                    <option value="emergency">🔴 EMERGENCY / IMMEDIATE ACTION</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block mb-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">Instructions</label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                className="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:border-blue-500 focus:bg-black/50 transition-all outline-none h-40 resize-none text-lg placeholder-gray-500"
-                                placeholder="Write clear, step-by-step instructions..."
-                                required
-                            ></textarea>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-red-900/40 flex items-center justify-center gap-3 text-lg tracking-wide uppercase"
-                        >
-                            <FaBullhorn className="animate-pulse" /> Broadcast Now
-                        </button>
-                    </form>
+            {/* 1. Header & Stats Section */}
+            <div className="mb-4">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-4 gap-4">
+                    <div>
+                        <h6 className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-1">Command Center</h6>
+                        <h1 className="text-2xl font-extrabold text-white">Dashboard Overview</h1>
+                    </div>
                 </div>
 
-                {/* Active Alerts List - Glass Effect */}
-                <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-8 rounded-3xl shadow-2xl relative">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Stat Card 1 */}
+                    <div className="bg-[#1f2937]/50 backdrop-blur-md border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:border-blue-500/30 transition-all group">
+                        <div>
+                            <p className="text-gray-400 text-xs font-medium uppercase">Active Alerts</p>
+                            <h3 className="text-2xl font-bold text-white mt-1">{activeCount}</h3>
+                        </div>
+                        <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                            <FaSignal className="text-lg" />
+                        </div>
+                    </div>
 
-                    <h2 className="text-3xl font-bold mb-8 text-green-200 flex items-center justify-between">
-                        Live Feed
-                        <span className="text-sm font-normal bg-white/10 px-3 py-1 rounded-full text-white/60">
-                            {alerts.filter(a => a.active).length} Active
-                        </span>
-                    </h2>
+                    {/* Stat Card 2 */}
+                    <div className="bg-[#1f2937]/50 backdrop-blur-md border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:border-red-500/30 transition-all group">
+                        <div>
+                            <p className="text-gray-400 text-xs font-medium uppercase">Emergency Status</p>
+                            <h3 className={`text-2xl font-bold mt-1 ${emergencyCount > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                {emergencyCount > 0 ? 'CRITICAL' : 'STABLE'}
+                            </h3>
+                        </div>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${emergencyCount > 0 ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'}`}>
+                            <FaShieldAlt className="text-lg" />
+                        </div>
+                    </div>
 
-                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                        {alerts.filter(a => a.active).length === 0 ? (
-                            <div className="text-center py-20 opacity-50 border-2 border-dashed border-white/10 rounded-2xl">
-                                <FaCheckCircle className="text-5xl mx-auto mb-4 text-gray-600" />
-                                <p className="text-xl">No Active Threats</p>
-                                <p className="text-sm mt-2">System is monitoring normally.</p>
+                    {/* Stat Card 3 */}
+                    <div className="bg-[#1f2937]/50 backdrop-blur-md border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:border-purple-500/30 transition-all group">
+                        <div>
+                            <p className="text-gray-400 text-xs font-medium uppercase">Total History</p>
+                            <h3 className="text-2xl font-bold text-white mt-1">{totalCount}</h3>
+                        </div>
+                        <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                            <FaHistory className="text-lg" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 2. Main Content Grid */}
+            <div className="grid lg:grid-cols-12 gap-6 h-full">
+
+                {/* LEFT: Broadcast Form (7 cols) */}
+                <div className="lg:col-span-7 space-y-6">
+                    <div className="bg-[#1f2937] border border-white/5 rounded-3xl p-6 shadow-xl">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                                <FaBullhorn className="text-sm" />
                             </div>
-                        ) : (
-                            alerts.filter(a => a.active).map(alert => (
-                                <div key={alert._id} className={`p-6 rounded-2xl border transition-all hover:scale-[1.01] ${alert.severity === 'emergency' ? 'bg-gradient-to-br from-red-900/40 to-red-800/20 border-red-500/50 shadow-red-900/20' :
-                                        alert.severity === 'warning' ? 'bg-gradient-to-br from-orange-900/40 to-orange-800/20 border-orange-500/50' :
-                                            'bg-gradient-to-br from-blue-900/40 to-blue-800/20 border-blue-500/50'
-                                    } shadow-lg`}>
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                {alert.severity === 'emergency' && <FaExclamationCircle className="text-red-400 text-xl animate-pulse" />}
-                                                <span className={`text-xs px-3 py-1 rounded-full uppercase font-bold tracking-wider ${alert.severity === 'emergency' ? 'bg-red-500 text-white' :
-                                                        alert.severity === 'warning' ? 'bg-orange-500 text-white' :
-                                                            'bg-blue-500 text-white'
+                            <h2 className="text-xl font-bold text-white">Broadcast New Alert</h2>
+                        </div>
+
+                        {status.msg && (
+                            <div className={`p-3 mb-5 rounded-xl flex items-center gap-3 text-sm ${status.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                {status.type === 'success' ? <FaCheckCircle /> : <FaExclamationCircle />}
+                                {status.msg}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="grid md:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Alert Title</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#111827] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-sm placeholder-gray-600"
+                                        placeholder="e.g. Fire Drill in Block A"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Severity</label>
+                                    <select
+                                        name="severity"
+                                        value={formData.severity}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#111827] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-sm"
+                                    >
+                                        <option value="info">Info</option>
+                                        <option value="warning">Warning</option>
+                                        <option value="emergency">Critical Emergency</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Detailed Instructions</label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    className="w-full bg-[#111827] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none h-24 resize-none leading-relaxed text-sm placeholder-gray-600"
+                                    placeholder="Enter detailed safety protocols or instructions..."
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-blue-600/20 flex items-center justify-center gap-2"
+                            >
+                                <FaBullhorn /> Publish Broadcast
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {/* RIGHT: Live Feed (5 cols) */}
+                <div className="lg:col-span-5 h-full">
+                    <div className="bg-[#1f2937] border border-white/5 rounded-3xl p-8 shadow-xl h-full flex flex-col">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-white">Live Dispatches</h2>
+                            <span className="bg-white/5 text-xs font-bold px-2 py-1 rounded text-gray-400 border border-white/5">Real-time</span>
+                        </div>
+
+                        <div className="overflow-y-auto custom-scrollbar flex-1 -mr-2 pr-2 space-y-3">
+                            {activeCount === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 min-h-[200px]">
+                                    <FaCheckCircle className="text-4xl mb-3" />
+                                    <p>All systems normal</p>
+                                </div>
+                            ) : (
+                                alerts.filter(a => a.active).map(alert => (
+                                    <div key={alert._id} className="relative pl-6 py-2 group">
+                                        {/* Timeline Line */}
+                                        <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-full ${alert.severity === 'emergency' ? 'bg-red-500' :
+                                            alert.severity === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
+                                            }`}></div>
+
+                                        <div className="bg-[#111827] p-4 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${alert.severity === 'emergency' ? 'bg-red-500/20 text-red-400' :
+                                                    alert.severity === 'warning' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'
                                                     }`}>
                                                     {alert.severity}
                                                 </span>
-                                                <span className="text-xs text-white/40 font-mono">
-                                                    {new Date(alert.createdAt).toLocaleTimeString()}
-                                                </span>
+                                                <button onClick={() => deactivateAlert(alert._id)} className="text-gray-600 hover:text-red-400 transition-colors">
+                                                    <FaTrash className="text-xs" />
+                                                </button>
                                             </div>
-
-                                            <h3 className="font-bold text-xl text-white mb-2">{alert.title}</h3>
-                                            <p className="text-gray-300 leading-relaxed">{alert.description}</p>
+                                            <h4 className="font-bold text-white text-sm mb-1">{alert.title}</h4>
+                                            <p className="text-gray-400 text-xs line-clamp-2">{alert.description}</p>
                                         </div>
-
-                                        <button
-                                            onClick={() => deactivateAlert(alert._id)}
-                                            className="ml-4 bg-black/20 hover:bg-red-600/80 text-white/60 hover:text-white p-3 rounded-lg transition-colors border border-white/5"
-                                            title="End Alert"
-                                        >
-                                            <FaTrash />
-                                        </button>
                                     </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    <div className="mt-10 pt-6 border-t border-white/10">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Recent History</h3>
-                        <div className="space-y-3 opacity-60">
-                            {alerts.filter(a => !a.active).slice(0, 3).map(alert => (
-                                <div key={alert._id} className="p-3 bg-black/20 rounded-lg flex justify-between items-center text-sm border border-white/5 hover:bg-black/40 transition">
-                                    <span className="font-medium text-gray-300 truncate w-2/3">{alert.title}</span>
-                                    <span className="text-gray-500 font-mono text-xs">{new Date(alert.createdAt).toLocaleDateString()}</span>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     );

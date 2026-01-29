@@ -44,7 +44,7 @@ const Login = () => {
                     </div>
                     <h2 className="text-3xl font-bold text-white mb-2">{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
                     <p className="text-gray-400 text-sm">
-                        {isRegister ? 'Join the secure campus network' : 'Enter your credentials to access the system'}
+                        {isRegister ? 'Join the ResQ AI disaster response network' : 'Enter your credentials to access the system'}
                     </p>
                 </div>
 

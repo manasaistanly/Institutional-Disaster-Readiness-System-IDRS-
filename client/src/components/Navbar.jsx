@@ -23,8 +23,8 @@ const Navbar = () => {
                         <div className="bg-blue-600 p-2 rounded-lg group-hover:bg-blue-500 transition-colors">
                             <FaShieldAlt className="text-white text-xl" />
                         </div>
-                        <span className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:to-white transition-all">
-                            SafeCampus
+                        <span className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 group-hover:to-white transition-all">
+                            ResQ AI
                         </span>
                     </Link>
 

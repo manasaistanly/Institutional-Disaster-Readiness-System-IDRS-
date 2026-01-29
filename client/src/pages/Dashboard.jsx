@@ -23,20 +23,10 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen container mx-auto px-4 py-8 text-white">
 
-            {/* HEADER */}
-            <header className="mb-8 flex flex-col md:flex-row items-start md:items-center gap-4 border-b border-white/10 pb-6">
-                <div>
-                    <h1 className="text-3xl font-bold">Welcome, <span className="text-blue-400">{user.name}</span></h1>
-                    <p className="text-gray-400 text-sm mt-1">Dashboard Overview</p>
-                </div>
-                <span className="md:ml-auto px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider text-blue-300">
-                    {user.role.replace('_', ' ')}
-                </span>
-            </header>
-
             {/* ALERT SECTION */}
-            {alerts.length > 0 && (
-                <section className="mb-8 space-y-4">
+            {/* ALERT SECTION - USERS ONLY */}
+            {user.role === 'user' && alerts.length > 0 && (
+                <section className="mb-4 space-y-4">
                     {alerts.map(alert => (
                         <div key={alert._id} className={`p-4 rounded-xl border-l-4 backdrop-blur-md ${alert.severity === 'emergency' ? 'bg-red-900/20 border-red-500' :
                             alert.severity === 'warning' ? 'bg-orange-900/20 border-orange-500' :
@@ -57,11 +47,11 @@ const Dashboard = () => {
                 </section>
             )}
 
-            <div className="dashboard-content">
+            <div className="dashboard-content h-full">
 
                 {/* === USER VIEW: FOCUS ON CHATBOT === */}
                 {user.role === 'user' && (
-                    <div className="user-main-view h-[70vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                    <div className="user-main-view h-[85vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#171717]">
                         <ChatBot embedded={true} />
                     </div>
                 )}
