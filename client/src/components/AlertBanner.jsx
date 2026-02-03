@@ -115,9 +115,13 @@ const AlertBanner = () => {
                 {/* Emergency Siren Sound Source */}
                 <audio
                     ref={audioRef}
-                    src="https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3"
+                    src="/alarm.mp3"
                     loop
                     preload="auto"
+                    onError={(e) => {
+                        console.warn('❌ Audio failed to load - may be blocked by ad blocker');
+                        setAudioBlocked(true);
+                    }}
                 />
 
                 {/* Pulse Effect Overlay */}
