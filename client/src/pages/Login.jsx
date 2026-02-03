@@ -152,11 +152,12 @@ const Login = () => {
                         <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                         <input
                             type="password"
-                            placeholder="Password"
+                            placeholder="Password (Min. 6 chars)"
                             className="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 focus:bg-black/50 transition-all placeholder-gray-500"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            minLength={6}
                         />
                     </div>
 
