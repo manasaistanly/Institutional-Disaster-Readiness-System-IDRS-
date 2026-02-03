@@ -45,6 +45,7 @@ const Login = () => {
             }
             navigate('/dashboard');
         } catch (err) {
+            console.error('Login Error:', err);
             setError(err.response?.data?.message || 'Authentication failed');
         } finally {
             setIsLoading(false);
@@ -172,6 +173,7 @@ const Login = () => {
                     <p className="text-gray-400 text-sm">
                         {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
                         <button
+                            type="button"
                             onClick={() => setIsRegister(!isRegister)}
                             className="text-blue-400 hover:text-blue-300 font-semibold ml-1 transition-colors outline-none"
                         >
