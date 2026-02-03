@@ -12,41 +12,46 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { name, email, password, role, institutionId, location } = req.body;
+    try {
+        const { name, email, password, role, institutionId, location } = req.body;
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
+        // Check if user exists
+        const userExists = await User.findOne({ email });
 
-    if (userExists) {
-        return res.status(400).json({ message: 'User already exists' });
-    }
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
 
-    // Role validation safety check (prevent random users from being super_admin)
-    // In a real app, this would be stricter, but for now we allow it for demo setup or rely on specific routes.
-    // Ideally user creation for admins should be protected or seeded.
-    // For this implementation, we will allow it but one should change the secret logic or require admin token.
-    // For simplicity, we just create the user.
+        // Role validation safety check (prevent random users from being super_admin)
+        // In a real app, this would be stricter, but for now we allow it for demo setup or rely on specific routes.
+        // Ideally user creation for admins should be protected or seeded.
+        // For this implementation, we will allow it but one should change the secret logic or require admin token.
+        // For simplicity, we just create the user.
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-        role: role || 'user',
-        institutionId,
-        location: location || { state: 'Telangana', district: 'Hyderabad', city: '', country: 'India' }
-    });
-
-    if (user) {
-        res.status(201).json({
-            _id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            location: user.location,
-            token: generateToken(user._id),
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role: role || 'user',
+            institutionId,
+            location: location || { state: 'Telangana', district: 'Hyderabad', city: '', country: 'India' }
         });
-    } else {
-        res.status(400).json({ message: 'Invalid user data' });
+
+        if (user) {
+            res.status(201).json({
+                _id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                location: user.location,
+                token: generateToken(user._id),
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    } catch (error) {
+        console.error('Register Error:', error);
+        res.status(500).json({ message: error.message });
     }
 };
 
