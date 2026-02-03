@@ -100,7 +100,6 @@ const ChatBot = ({ embedded = false }) => {
                     </div>
                 )}
 
-                {/* Content - GPT Style Typography */}
                 <div className={`prose prose-invert max-w-none ${msg.isBot ? 'text-[16px] leading-7' : 'text-[16px]'}`}>
                     <ReactMarkdown components={{
                         p: ({ node, ...props }) => <p className="mb-4 last:mb-0 text-gray-100 font-light" {...props} />,
