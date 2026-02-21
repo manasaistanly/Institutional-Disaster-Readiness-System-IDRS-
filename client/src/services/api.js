@@ -5,6 +5,7 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: 60000, // 60s timeout for Render cold starts
 });
 
 // Add a request interceptor to attach the token

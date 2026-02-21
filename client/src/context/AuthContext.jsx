@@ -8,6 +8,21 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [serverReady, setServerReady] = useState(false);
+
+    // Warm up the Render backend on app load so it's awake when user tries to login
+    useEffect(() => {
+        const warmUp = async () => {
+            try {
+                await api.get('/', { timeout: 60000 });
+            } catch (_) {
+                // Ignore — this is just a wake-up ping
+            } finally {
+                setServerReady(true);
+            }
+        };
+        warmUp();
+    }, []);
 
     useEffect(() => {
         const checkUser = async () => {
